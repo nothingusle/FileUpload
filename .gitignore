@@ -11,3 +11,6 @@ dist/
 
 # Env files
 .env
+
+#upload file
+upload/
