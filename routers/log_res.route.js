@@ -2,6 +2,7 @@ import express from "express";
 import userModel from "../models/log_res.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
 const router = express.Router();
 /* router.get("/register", async (req, res) => {
   try {
@@ -25,8 +26,8 @@ router.post("/register", async (req, res) => {
         existUser,
         mes: "UserName and UserEmail already exist.",
       });
-    console.log("BODY:", req.body);
-    console.log("userPassword:", req.body.userPassword);
+    // console.log("BODY:", req.body);
+    // console.log("userPassword:", req.body.userPassword);
 
     const newPassword = await bcrypt.hash(userPassword, 10);
     const createNewUser = new userModel({
@@ -35,15 +36,19 @@ router.post("/register", async (req, res) => {
       userPassword: newPassword,
     });
     const saveNewUser = await createNewUser.save();
+    const jwtToken = jwt.sign(
+      { userId: saveNewUser._id, userName: saveNewUser.userName },
+      process.env.JWT_SECRET,
+      { expiresIn: "2h" }
+    );
     res.status(201).json({
       mes: "User Registered successfully",
       user: saveNewUser,
+      jwtToken,
     });
   } catch (err) {
     if (err)
-      return res
-        .status(500)
-        .json({ mes: "Something went wrong", mes: err.message });
+      return res.status(500).json({ mes: "Something went wrong", err: err });
   }
 });
 router.post("/login", async (req, res) => {
@@ -58,8 +63,12 @@ router.post("/login", async (req, res) => {
     if (!passwordCMP) {
       return res.status(404).json({ mes: "Password Not Match" });
     }
-
-    res.status(200).json({ mes: "User Login Successfully" });
+    const jwtToken = jwt.sign(
+      { userId: userFind._id, userName: userFind.userName },
+      process.env.JWT_SECRET,
+      { expiresIn: "2h" }
+    );
+    res.status(200).json({ mes: "User Login Successfully", jwtToken });
   } catch (err) {
     if (err) res.status(500).json({ err: err, mes: err.message });
   }
