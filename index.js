@@ -1,11 +1,13 @@
-import e from "express";
+import express from "express";
 import mogoServer from "./config/fileUpload.con.js";
-import { routes } from "./routers/fileUpload.route.js";
-const app = e();
+import fileRouter from "./routers/fileUpload.route.js";
+import userRouter from "./routers/log_res.route.js";
+const app = express();
 mogoServer();
-app.use(e.json());
-app.use(e.urlencoded({ extended: false }));
-app.use("/", routes);
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use("/student", fileRouter);
+app.use("/user", userRouter);
 
 const PORT = process.env.PORT;
 app.get("/", (req, res) => {

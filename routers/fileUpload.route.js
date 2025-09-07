@@ -1,4 +1,4 @@
-import e from "express";
+import express from "express";
 import multer from "multer";
 import path, { dirname, join } from "path";
 import { fileURLToPath } from "url";
@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const uploadPath = join(__dirname, "../upload");
 
-export const routes = e.Router();
+const routes = express.Router();
 
 //* Multer Storage
 const storage = multer.diskStorage({
@@ -150,3 +150,4 @@ routes.delete("/:id", async (req, res) => {
       .json({ err: err, mes: "Failed To Delete Student Data...☹" });
   }
 });
+export default routes;
