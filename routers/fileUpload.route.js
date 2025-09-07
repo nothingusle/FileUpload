@@ -65,7 +65,21 @@ routes.get("/:id", async (req, res) => {
 
 routes.post("/", upload.single("student_photo"), async (req, res) => {
   try {
-    let insertingStudentData = await studentModel(req.body);
+    if (!req.body._id) {
+      if (req.file) {
+        let dontUploadEnyErr = path.join(uploadPath, req.file.filename);
+        fs.unlink(dontUploadEnyErr, (err) => {
+          if (err)
+            res
+              .status(404)
+              .json({ err: err, mes: "Failed To Delete Image During Error" });
+        });
+      }
+
+      return res.status(404).json({ mes: "Please Enter Valid Data...☹" });
+    }
+
+    let insertingStudentData = new studentModel(req.body);
     if (req.file) {
       insertingStudentData.student_photo = req.file.filename;
     }
@@ -119,6 +133,16 @@ routes.put("/:id", upload.single("student_photo"), async (req, res) => {
 routes.delete("/:id", async (req, res) => {
   try {
     let deleteData = await studentModel.findByIdAndDelete(req.params.id);
+    if (!deleteData) return res.status(404).json("Student Data Not Found... ☹");
+    if (deleteData.student_photo) {
+      let deleteImage = path.join(uploadPath, deleteData.student_photo);
+      fs.unlink(deleteImage, (err) => {
+        if (err)
+          res
+            .status(404)
+            .json({ mes: "Failed To Delete image... ☹", err: err });
+      });
+    }
     res.status(201).json({ mes: "Data Deleted Successfully :)" });
   } catch (err) {
     res
